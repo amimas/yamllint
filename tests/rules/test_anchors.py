@@ -80,7 +80,8 @@ class AnchorsTestCase(RuleTestCase):
     def test_forbid_undeclared_aliases(self):
         conf = ('anchors:\n'
                 '  forbid-undeclared-aliases: true\n'
-                '  forbid-duplicated-anchors: false\n')
+                '  forbid-duplicated-anchors: false\n'
+                '  forbid-unused-anchors: false\n')
         self.check('---\n'
                    '- &b true\n'
                    '- &i 42\n'
@@ -147,7 +148,8 @@ class AnchorsTestCase(RuleTestCase):
     def test_forbid_duplicated_anchors(self):
         conf = ('anchors:\n'
                 '  forbid-undeclared-aliases: false\n'
-                '  forbid-duplicated-anchors: true\n')
+                '  forbid-duplicated-anchors: true\n'
+                '  forbid-unused-anchors: false\n')
         self.check('---\n'
                    '- &b true\n'
                    '- &i 42\n'
