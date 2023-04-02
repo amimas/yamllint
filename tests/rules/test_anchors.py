@@ -208,7 +208,7 @@ class AnchorsTestCase(RuleTestCase):
                    problem3=(21, 18),
                    problem4=(27, 20))
 
-    def test_forbit_unused_anchors(self):
+    def test_forbid_unused_anchors(self):
         conf = ('anchors:\n'
                 '  forbid-undeclared-aliases: false\n'
                 '  forbid-duplicated-anchors: false\n'
