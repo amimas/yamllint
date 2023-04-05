@@ -89,30 +89,60 @@ from yamllint.linter import LintProblem
 ID = 'anchors'
 TYPE = 'token'
 CONF = {'forbid-undeclared-aliases': bool,
-        'forbid-duplicated-anchors': bool}
+        'forbid-duplicated-anchors': bool,
+        'forbid-unused-anchors': bool}
 DEFAULT = {'forbid-undeclared-aliases': True,
-           'forbid-duplicated-anchors': False}
+           'forbid-duplicated-anchors': False,
+           'forbid-unused-anchors': False}
 
 
 def check(conf, token, prev, next, nextnext, context):
-    if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors']:
+    if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors'] or conf['forbid-unused-anchors']:
         if isinstance(token, (yaml.StreamStartToken, yaml.DocumentStartToken)):
-            context['anchors'] = set()
+            # context['anchors'] = set()
+            context['anchors'] = list()
 
     if (conf['forbid-undeclared-aliases'] and
             isinstance(token, yaml.AliasToken) and
-            token.value not in context['anchors']):
+            # token.value not in context['anchors']):
+            not any(anchors['value'] == token.value for anchors in context['anchors'])):
         yield LintProblem(
             token.start_mark.line + 1, token.start_mark.column + 1,
             f'found undeclared alias "{token.value}"')
 
     if (conf['forbid-duplicated-anchors'] and
             isinstance(token, yaml.AnchorToken) and
-            token.value in context['anchors']):
+            # token.value in context['anchors']):
+            any(anchors['value'] == token.value for anchors in context['anchors'])):
         yield LintProblem(
             token.start_mark.line + 1, token.start_mark.column + 1,
             f'found duplicated anchor "{token.value}"')
+        
+    # if (conf['forbid-unused-anchors']):
+    #     print(context['anchors'])
 
-    if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors']:
+    #     if(isinstance(token, (yaml.DocumentEndToken, yaml.StreamEndToken))):
+    #         # Unused anchors can only be detected at the end of Document.
+    #         # End of document can be either '...' for multiple document in same file
+    #         # or end of stream containing a single document.
+    #         print("checking unused anchors")
+    #     elif(isinstance(token, yaml.AliasToken)):
+    #         # Record aliases for each anchors. At the end of document, if an anchor
+    #         # does not have an alias, it can be reported as a problem.
+    #         print("recording aliases " + token.value)
+    #         # context['aliases'].add(token.value)
+
+    if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors'] or conf['forbid-unused-anchors']:
         if isinstance(token, yaml.AnchorToken):
-            context['anchors'].add(token.value)
+            # context['anchors'].add(token.value)
+            anchor = {
+                "value": token.value,
+                "line": token.start_mark.line + 1,
+                "column": token.start_mark.column + 1
+            }
+            context['anchors'].append(anchor)
+            # context['anchors'].add({
+            #     "token": token.value,
+            #     "line": token.start_mark.line + 1,
+            #     "column": token.start_mark.column + 1
+            # })
