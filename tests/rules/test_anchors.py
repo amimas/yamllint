@@ -215,7 +215,7 @@ class AnchorsTestCase(RuleTestCase):
                 '  forbid-undeclared-aliases: false\n'
                 '  forbid-duplicated-anchors: false\n'
                 '  forbid-unused-anchors: true\n')
-        
+
         self.check('---\n'
                    '- &b true\n'
                    '- &i 42\n'
@@ -250,7 +250,9 @@ class AnchorsTestCase(RuleTestCase):
                    '- &s hello\n'
                    '- &f_m {k: v}\n'
                    '- &f_s [1, 2]\n'
-                   '- b1\n' # None of the anchors declared above are being used in rest of the document
+                   # None of the anchors declared above are
+                   # being used in rest of the document
+                   '- b1\n'
                    '- i1\n'
                    '- s1\n'
                    '- f_m1\n'
@@ -259,17 +261,21 @@ class AnchorsTestCase(RuleTestCase):
                    '- &b true\n'
                    '- &i 42\n'
                    '- &s hello\n'
-                   '- b1\n' # None of the anchors declared above are being used in rest of the document
+                   # None of the anchors declared above are
+                   # being used in rest of the document
+                   '- b1\n'
                    '- i1\n'
                    '- s1\n'
                    '---\n'
-                   'block mapping: &b_m\n' # This anchor is not being used in rest of the document
+                   # This anchor is not being used in rest of the document
+                   'block mapping: &b_m\n'
                    '  key: value\n'
                    'extended:\n'
                    '  foo: bar\n'
                    '---\n'
-                   '{a: 1, &x b: 2, c: &y 3, x: 4, e: 5}\n' # The anchor x, y, are not being used
-                   '...\n', 
+                   # The anchor x, y, are not being used
+                   '{a: 1, &x b: 2, c: &y 3, x: 4, e: 5}\n'
+                   '...\n',
                    conf,
                    problem1=(2, 3),
                    problem2=(3, 3),
@@ -281,5 +287,4 @@ class AnchorsTestCase(RuleTestCase):
                    problem8=(15, 3),
                    problem9=(20, 16),
                    problem10=(25, 8),
-                   problem11=(25, 20)
-                )
+                   problem11=(25, 20))

@@ -120,53 +120,67 @@ DEFAULT = {'forbid-undeclared-aliases': True,
 
 
 def check(conf, token, prev, next, nextnext, context):
-    if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors'] or conf['forbid-unused-anchors']:
-        if isinstance(token, (yaml.StreamStartToken, yaml.DocumentStartToken, yaml.DocumentEndToken)):
+    if (conf['forbid-undeclared-aliases'] or
+            conf['forbid-duplicated-anchors'] or
+            conf['forbid-unused-anchors']):
+        if isinstance(token, (
+                yaml.StreamStartToken,
+                yaml.DocumentStartToken,
+                yaml.DocumentEndToken)):
             context['anchors'] = list()
 
     if (conf['forbid-undeclared-aliases'] and
             isinstance(token, yaml.AliasToken) and
-            not any(anchors['value'] == token.value for anchors in context['anchors'])):
+            not any(anchors['value'] == token.value for
+                    anchors in context['anchors'])):
         yield LintProblem(
             token.start_mark.line + 1, token.start_mark.column + 1,
             f'found undeclared alias "{token.value}"')
 
     if (conf['forbid-duplicated-anchors'] and
             isinstance(token, yaml.AnchorToken) and
-            any(anchors['value'] == token.value for anchors in context['anchors'])):
+            any(anchors['value'] == token.value for
+                anchors in context['anchors'])):
         yield LintProblem(
             token.start_mark.line + 1, token.start_mark.column + 1,
             f'found duplicated anchor "{token.value}"')
-        
+
     if (conf['forbid-unused-anchors']):
         # Unused anchors can only be detected at the end of Document.
         # End of document can be either
-        #   - end of stream 
-        #   - end of document sign '...' 
+        #   - end of stream
+        #   - end of document sign '...'
         #   - start of a new document sign '---'
         # If next token indicates end of document and there are one or
         # more anchors, check if they have been used or not.
         # If they haven't been used, report problem on that anchor.
-        if (isinstance(next, (yaml.StreamEndToken, yaml.DocumentStartToken, yaml.DocumentEndToken)) and
-            len(context['anchors']) > 0):
+        if (isinstance(next, (yaml.StreamEndToken,
+                              yaml.DocumentStartToken,
+                              yaml.DocumentEndToken)) and
+                len(context['anchors']) > 0):
 
             for anchor in context['anchors']:
                 if anchor['aliasCount'] == 0:
                     yield LintProblem(
                         anchor['line'], anchor['column'],
-                        f'found unused anchor ' + anchor['value']
+                        f"found unused anchor {anchor['value']}"
                     )
-        # If we haven't reached end of document yet and current token is an alias,
-        # increment the count of alias for associated anchor. This can be used to
-        # check when end of document is reached and evaluate if an anchor is unused.
-        elif(isinstance(token, yaml.AliasToken)):
+        # If we haven't reached end of document yet and current token
+        # is an alias, increment the count of alias for associated anchor.
+        # This can be used to check when end of document is reached and
+        # evaluate if an anchor is unused.
+        elif (isinstance(token, yaml.AliasToken)):
             for anchor in context['anchors']:
                 if anchor['value'] == token.value:
                     anchor['aliasCount'] += 1
                     break
 
-    if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors'] or conf['forbid-unused-anchors']:
-        if isinstance(token, yaml.AnchorToken) and not any(anchors['value'] == token.value for anchors in context['anchors']):
+    if (conf['forbid-undeclared-aliases'] or
+            conf['forbid-duplicated-anchors'] or
+            conf['forbid-unused-anchors']):
+        if (isinstance(token, yaml.AnchorToken) and
+                not any(anchors['value'] == token.value for
+                        anchors in context['anchors'])):
             anchor = {
                 "value": token.value,
                 "line": token.start_mark.line + 1,
