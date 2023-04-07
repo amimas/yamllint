@@ -24,6 +24,8 @@ anchors.
   later in the document).
 * Set ``forbid-duplicated-anchors`` to ``true`` to avoid duplications of a same
   anchor.
+* Set ``forbid-unused-anchors`` to ``true`` to avoid anchors being declared but
+  not used anywhere via alias.
 
 .. rubric:: Default values (when enabled)
 
@@ -33,6 +35,7 @@ anchors.
    anchors:
      forbid-undeclared-aliases: true
      forbid-duplicated-anchors: false
+     forbid-unused-anchors: false
 
 .. rubric:: Examples
 
@@ -78,6 +81,26 @@ anchors.
     ---
     - &anchor Foo Bar
     - &anchor [item 1, item 2]
+
+#. With ``anchors: {forbid-unused-anchors: true}``
+
+   the following code snippet would **PASS**:
+   ::
+
+    ---
+    - &anchor
+      foo: bar
+    - *anchor
+
+   the following code snippet would **FAIL**:
+   ::
+
+    ---
+    - &anchor
+      foo: bar
+    - items:
+      - item1
+      - item2
 """
 
 
