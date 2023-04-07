@@ -98,9 +98,10 @@ DEFAULT = {'forbid-undeclared-aliases': True,
 
 def check(conf, token, prev, next, nextnext, context):
     if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors'] or conf['forbid-unused-anchors']:
-        if isinstance(token, (yaml.StreamStartToken, yaml.DocumentStartToken)):
+        if isinstance(token, (yaml.StreamStartToken, yaml.DocumentStartToken, yaml.DocumentEndToken)):
             # context['anchors'] = set()
             context['anchors'] = list()
+            # context['aliases'] = set()
 
     if (conf['forbid-undeclared-aliases'] and
             isinstance(token, yaml.AliasToken) and
@@ -118,31 +119,49 @@ def check(conf, token, prev, next, nextnext, context):
             token.start_mark.line + 1, token.start_mark.column + 1,
             f'found duplicated anchor "{token.value}"')
         
-    # if (conf['forbid-unused-anchors']):
-    #     print(context['anchors'])
+    if (conf['forbid-unused-anchors']):
+        if (isinstance(next, (yaml.DocumentStartToken, yaml.DocumentEndToken, yaml.StreamEndToken)) and
+            len(context['anchors']) > 0):
+            # Unused anchors can only be detected at the end of Document.
+            # End of document can be either '...' (DocumentEndToken) or '---' (DocumentStartToken)
+            # for multiple documents in same file
+            # or end of stream containing a single/multiple documents.
+            print("checking unused anchors")
+            print(context['anchors'])
+            # print(context['aliases'])
+            for anchor in context['anchors']:
+                if anchor['aliasCount'] == 0:
+                    yield LintProblem(
+                        anchor['line'], anchor['column'],
+                        f'found unused anchor ' + anchor['value']
+                    )
+        elif(isinstance(token, yaml.AliasToken)):
+            for anchor in context['anchors']:
+                if anchor['value'] == token.value:
+                    anchor['aliasCount'] += 1
+                    break
+            # Record the alias in the anchor.
+            # It can be used to detect if an anchor
+            # does not have an alias and reported as a problem.
+            
+            # matchingAnchor = next((anchor for anchor in context['anchors'] if anchor["value"] == token.value), None)
 
-    #     if(isinstance(token, (yaml.DocumentEndToken, yaml.StreamEndToken))):
-    #         # Unused anchors can only be detected at the end of Document.
-    #         # End of document can be either '...' for multiple document in same file
-    #         # or end of stream containing a single document.
-    #         print("checking unused anchors")
-    #     elif(isinstance(token, yaml.AliasToken)):
-    #         # Record aliases for each anchors. At the end of document, if an anchor
-    #         # does not have an alias, it can be reported as a problem.
-    #         print("recording aliases " + token.value)
-    #         # context['aliases'].add(token.value)
+            # print("recording aliases " + token.value)
+            # context['aliases'].add(token.value)
 
     if conf['forbid-undeclared-aliases'] or conf['forbid-duplicated-anchors'] or conf['forbid-unused-anchors']:
-        if isinstance(token, yaml.AnchorToken):
-            # context['anchors'].add(token.value)
+        if isinstance(token, yaml.AnchorToken) and not any(anchors['value'] == token.value for anchors in context['anchors']):
             anchor = {
                 "value": token.value,
                 "line": token.start_mark.line + 1,
-                "column": token.start_mark.column + 1
+                "column": token.start_mark.column + 1,
+                "aliasCount": 0
             }
+            # Keep record of the anchor
             context['anchors'].append(anchor)
-            # context['anchors'].add({
-            #     "token": token.value,
-            #     "line": token.start_mark.line + 1,
-            #     "column": token.start_mark.column + 1
-            # })
+        # if isinstance(token, yaml.AliasToken):
+        #     context['aliases'].add(token.value)
+        #     # alias = {
+        #     #     "line": token.start_mark.line + 1,
+        #     #     "column": token.start_mark.column + 1
+        #     # }

@@ -269,7 +269,8 @@ class AnchorsTestCase(RuleTestCase):
                    '  foo: bar\n' # The anchor declared above is not being used here
                    '---\n'
                    '{a: 1, &x b: 2, c: &y 3, x: 4, e: 5}\n' # The anchor x, y, are not being used
-                   '...\n', conf,
+                   '...\n', 
+                   conf,
                    problem1=(2, 3),
                    problem2=(3, 3),
                    problem3=(4, 3),
@@ -278,6 +279,7 @@ class AnchorsTestCase(RuleTestCase):
                    problem6=(13, 3),
                    problem7=(14, 3),
                    problem8=(15, 3),
-                   problem9=(20, 15),
+                   problem9=(20, 16),
                    problem10=(25, 8),
-                   problem11=(25, 19))
+                   problem11=(25, 20)
+                )
