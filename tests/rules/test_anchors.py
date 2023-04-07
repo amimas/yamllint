@@ -250,7 +250,7 @@ class AnchorsTestCase(RuleTestCase):
                    '- &s hello\n'
                    '- &f_m {k: v}\n'
                    '- &f_s [1, 2]\n'
-                   '- b1\n' # None of the anchors declared above are being used here and below
+                   '- b1\n' # None of the anchors declared above are being used in rest of the document
                    '- i1\n'
                    '- s1\n'
                    '- f_m1\n'
@@ -259,14 +259,14 @@ class AnchorsTestCase(RuleTestCase):
                    '- &b true\n'
                    '- &i 42\n'
                    '- &s hello\n'
-                   '- b1\n' # None of the anchors declared above are being used here and below
+                   '- b1\n' # None of the anchors declared above are being used in rest of the document
                    '- i1\n'
                    '- s1\n'
                    '---\n'
-                   'block mapping: &b_m\n'
+                   'block mapping: &b_m\n' # This anchor is not being used in rest of the document
                    '  key: value\n'
                    'extended:\n'
-                   '  foo: bar\n' # The anchor declared above is not being used here
+                   '  foo: bar\n'
                    '---\n'
                    '{a: 1, &x b: 2, c: &y 3, x: 4, e: 5}\n' # The anchor x, y, are not being used
                    '...\n', 
